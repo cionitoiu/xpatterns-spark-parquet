@@ -4,7 +4,7 @@
 
 	<groupId>com.xpatterns.spark.parquet</groupId>
 	<artifactId>spark-parquet-utility</artifactId>
-	<version>1.0.0-spark1.1.0</version>
+	<version>1.0.0-spark1.6.0</version>
 
 	<name>spark-parquet-utility</name>
 	<url>https://github.com/Atigeo/xpatterns-spark-parquet</url>
@@ -22,6 +22,12 @@
 		<developer>
 			<name>Andrei Avramescu</name>
 			<email>andrei.avramescu@yahoo.com</email>
+			<organization>Atigeo</organization>
+			<organizationUrl>http://www.atigeo.com</organizationUrl>
+		</developer>
+		<developer>
+			<name>Cristian Ionitoiu</name>
+			<email>cristian.ionitoiu@atigeo.com</email>
 			<organization>Atigeo</organization>
 			<organizationUrl>http://www.atigeo.com</organizationUrl>
 		</developer>
@@ -43,31 +49,51 @@
 		</repository>
 	</distributionManagement>
 
-	<repositories>
-		<repository>
-			<id>cloudera-repo-releases</id>
-			<url>https://repository.cloudera.com/artifactory/repo/</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
 
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_2.10</artifactId>
-			<version>1.1.0</version>
+			<version>1.6.0</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.tachyonproject</groupId>
-			<artifactId>tachyon</artifactId>
-			<version>0.5.0</version>
+			<groupId>org.apache.parquet</groupId>
+			<artifactId>parquet-hadoop</artifactId>
+			<version>1.7.0</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>
-			<version>2.5.0-cdh5.2.0</version>
+			<version>2.6.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jboss.netty</groupId>
+					<artifactId>netty</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>jdk.tools</groupId>
+					<artifactId>jdk.tools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 	</dependencies>
@@ -86,35 +112,10 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.2.0</version>
-				<executions>
-					<execution>
-						<id>scala-compile-first</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>add-source</goal>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>scala-test-compile</id>
-						<phase>process-test-resources</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>doc</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>doc-jar</goal>
-						</goals>
-					</execution>
-				</executions>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+				<version>2.9.1</version>
 			</plugin>
-
 		</plugins>
 	</build>
 
