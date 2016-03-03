@@ -51,11 +51,20 @@
 	</distributionManagement>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_2.10</artifactId>
 			<version>1.6.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.twitter</groupId>
+					<artifactId>parquet-column</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.twitter</groupId>
+					<artifactId>parquet-hadoop</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -100,7 +109,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 	</dependencies>
 
 	<build>
