@@ -15,9 +15,9 @@ import org.apache.spark.mapreduce.SparkHadoopMapReduceUtil
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.{ScalaReflection, CatalystTypeConverters}
 import org.apache.spark.sql.catalyst.expressions.{Attribute, GenericMutableRow}
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{StructType, DataType}
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.{DataFrame, SQLContext, Row}
+import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.{SerializableWritable, SparkContext}
 import org.apache.parquet.hadoop.metadata.{CompressionCodecName, BlockMetaData, FileMetaData, ParquetMetadata}
 import org.apache.parquet.hadoop.util.ContextUtil
@@ -71,7 +71,7 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
         partitionList
       })
 
-      val df = sqlC.internalCreateDataFrame(rdd, StructType.fromString(metadata))
+      val df = sqlC.internalCreateDataFrame(rdd, DataType.fromJson(metadata).asInstanceOf[StructType])
       df
     }
   }
@@ -171,10 +171,10 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
 
   /**
     * Obtains a Parquet writer object based on parameters below
-    * @param filePath - path to file
-    * @param attributes
-    * @param codec
-    * @param parquetBlockSize
+    * @param filePath    - path to file
+    * @param attributes  - schema attributes
+    * @param codec       - compression codec (default value)
+    * @param parquetBlockSize  -- default value
     * @return
     */
   def getParquetWriter(filePath: String,
@@ -200,10 +200,10 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
 
   /**
     * Writes metadata file to Parquet.
-    * @param sc
-    * @param nameNode
-    * @param attributes
-    * @param folderPath
+    * @param sc          -- current spark context
+    * @param nameNode    -- hadoop name node address
+    * @param attributes  -- schema attributes
+    * @param folderPath  -- destination folder
     */
   def writeMetadata(sc: SparkContext, nameNode: String, attributes: Seq[Attribute], folderPath: String): Unit = {
     val metdataRdd = sc.parallelize(List(folderPath), 1)
@@ -223,10 +223,10 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
   }
 
   /**
-    * Reads metadata schema from Parquet file.
-    * @param sc
-    * @param nameNode
-    * @param folderPath
+    * Reads metadata schema from Parquet file via file footer.
+    * @param sc           -- spark context
+    * @param nameNode     -- hadoop name node address
+    * @param folderPath   -- source folder
     * @return
     */
   def readMetadata(sc: SparkContext, nameNode: String, folderPath: String) = {
@@ -237,12 +237,13 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
       val footer = ParquetFileReader.readFooter(conf,
                                                 new Path(path, ParquetFileWriter.PARQUET_METADATA_FILE),
                                                 ParquetMetadataConverter.NO_FILTER)
-      footer.getFileMetaData.getSchema.toString
+      val st = ParquetRelation.readSchemaFromFooter(new Footer(new Path(path),footer), new CatalystSchemaConverter())
+      st.json
     }.first
   }
 
   def getInputSplits(sc: SparkContext, nameNodeUrl: String, path: String, metadata: String) = {
-    val parquetFolderPath = nameNodeUrl + "/" + path
+    val parquetFolderPath = nameNodeUrl + path
     val parquetFolderRddPath: RDD[String] = sc.parallelize(List(parquetFolderPath), 1)
 
     val rdd = parquetFolderRddPath.flatMap(path => {
@@ -270,9 +271,7 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
 
   def sanitizePath(path: String) = {
     val pathIntermediary = if (path.endsWith("/")) path.substring(0, path.length - 1) else path
-    if (pathIntermediary.startsWith("/"))
-      pathIntermediary.substring(1, pathIntermediary.length)
-    else pathIntermediary
+    pathIntermediary
   }
 
   def addInputPath(job: Job, path: Path) = {
