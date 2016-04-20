@@ -277,7 +277,7 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
   def addInputPath(job: Job, path: Path) = {
     val conf = job.getConfiguration
     val dirStr = StringUtils.escapeString(path.toString)
-    val dirs = conf.get(org.apache.hadoop.mapreduce.lib.input.FileInputFormat.INPUT_DIR)
+    val dirs = conf.get(org.apache.hadoop.mapreduce.lib.input.FileInputFormat.INPUT_DIR) //mapred.input.dir
     conf.set(org.apache.hadoop.mapreduce.lib.input.FileInputFormat.INPUT_DIR, if (dirs == null) dirStr else dirs + "," + dirStr)
   }
 
