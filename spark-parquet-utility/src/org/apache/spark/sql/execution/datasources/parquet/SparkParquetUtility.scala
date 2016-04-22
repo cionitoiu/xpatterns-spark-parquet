@@ -19,11 +19,11 @@ import org.apache.spark.sql.types.{StructType, DataType}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import org.apache.spark.{SerializableWritable, SparkContext}
-import org.apache.parquet.hadoop.metadata.{CompressionCodecName, BlockMetaData, FileMetaData, ParquetMetadata}
-import org.apache.parquet.hadoop.util.ContextUtil
-import org.apache.parquet.format.converter.ParquetMetadataConverter
-import org.apache.parquet.hadoop._
-import org.apache.parquet.schema.MessageTypeParser.parseMessageType;
+import parquet.hadoop.metadata.{CompressionCodecName, BlockMetaData, FileMetaData, ParquetMetadata}
+import parquet.hadoop.util.ContextUtil
+import parquet.format.converter.ParquetMetadataConverter
+import parquet.hadoop._
+import parquet.schema.MessageTypeParser.parseMessageType
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
