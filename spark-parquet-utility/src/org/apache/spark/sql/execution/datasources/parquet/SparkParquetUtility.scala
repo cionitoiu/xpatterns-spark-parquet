@@ -23,6 +23,7 @@ import org.apache.parquet.hadoop.metadata.{CompressionCodecName, BlockMetaData, 
 import org.apache.parquet.hadoop.util.ContextUtil
 import org.apache.parquet.format.converter.ParquetMetadataConverter
 import org.apache.parquet.hadoop._
+import org.apache.parquet.schema.MessageTypeParser.parseMessageType;
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -211,10 +212,9 @@ object SparkParquetUtility extends SparkHadoopMapReduceUtil with Serializable {
       val conf = new Configuration()
       conf.set(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY, nameNode)
       val schema = StructType.fromAttributes(attributes)
-      val parquetSchema = new CatalystSchemaConverter().convert(schema)
       val extraMetadata = mapAsJavaMap(Map(CatalystReadSupport.SPARK_METADATA_KEY -> schema.json))
       val createdBy = s"Apache Spark ${org.apache.spark.SPARK_VERSION}"
-      val fileMetadata = new FileMetaData(parquetSchema, extraMetadata, createdBy)
+      val fileMetadata = new FileMetaData(parseMessageType(schema.toString()), extraMetadata, createdBy)
       val parquetMetadata = new ParquetMetadata(fileMetadata, bufferAsJavaList(Seq.empty[BlockMetaData].toBuffer))
       val fpath = new Path(path, ParquetFileWriter.PARQUET_METADATA_FILE)
       val footer = new Footer(fpath, parquetMetadata)
